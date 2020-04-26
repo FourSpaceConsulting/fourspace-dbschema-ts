@@ -35,7 +35,8 @@ if (!process.argv.slice(2).length) {
 }
 
 try {
-
+    const schemaLocation='';
+    const sqlOutputLocation='';
     const definition = parseDefinition(schemaLocation);
     // console.log('DEfinition', definition);
     // DB Schema
