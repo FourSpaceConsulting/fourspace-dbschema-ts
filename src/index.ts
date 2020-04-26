@@ -35,8 +35,6 @@ if (!process.argv.slice(2).length) {
 }
 
 try {
-    const schemaLocation = 'C:/Users/Richard/Documents/Dev/spaces/thirdshift/database/schema.json';
-    const sqlOutputLocation = 'C:/Users/Richard/Documents/Dev/spaces/thirdshift/database/thirdshift.sql';
 
     const definition = parseDefinition(schemaLocation);
     // console.log('DEfinition', definition);
