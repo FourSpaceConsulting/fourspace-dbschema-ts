@@ -16,6 +16,7 @@ import { SequelizeBuilderImpl } from './sequelize-builder';
 import { PostgresFunctionBuilder } from './postgres/postgres-function-builder';
 import { PostgresTypescriptDaoBuilder } from './postgres/typescript/postgres-ts-dao-builder';
 import { CodeWriter } from './postgres/typescript/code-writer';
+import { readConfig } from './config';
 
 clear();
 console.log(
@@ -35,19 +36,18 @@ if (!process.argv.slice(2).length) {
 }
 
 try {
-    const schemaLocation='C:/Users/fours/Development/spaces/thirdshift/database/schema.json';
-    const sqlOutputLocation='C:/Users/fours/Development/spaces/thirdshift/database/thirdshift.sql';
-    const definition = parseDefinition(schemaLocation);
-    // console.log('DEfinition', definition);
-    // DB Schema
+    const writeConfig = readConfig('./config.json')
+    // Parse definition
+    const definition = parseDefinition(writeConfig.schemaLocation);
+    // Build DB Schema
     const builder = new PostgresSchemaBuilder(definition);
     const procBuilder = new PostgresFunctionBuilder(definition);
     // Code Generator
     const codeGenerator = new PostgresTypescriptDaoBuilder();
     // write
-    writeFileSync(sqlOutputLocation, builder.createTables() + '\n' + procBuilder.createUpdateSchema());
+    writeFileSync(writeConfig.sqlOutputLocation, builder.createTables() + '\n' + procBuilder.createUpdateSchema());
     const code = codeGenerator.generateDaoCode(definition);
-    const writer = new CodeWriter();
+    const writer = new CodeWriter(writeConfig);
     writer.write(code);
 
 } catch (e) {

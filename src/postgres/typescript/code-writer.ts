@@ -2,10 +2,17 @@ import { DaoCode } from "../../dao-code-generator";
 import { writeFileSync } from 'fs';
 import * as CodeUtil from './code-definition-util';
 import { paramCase } from 'change-case';
+import { WriteConfig } from "../../config";
 
-const codeOutputLocation = 'C:/Users/fours/Development/spaces/thirdshift/generated/';
 
 export class CodeWriter {
+
+    private readonly writeConfig: WriteConfig;
+
+    constructor(writeConfig: WriteConfig) {
+        this.writeConfig = writeConfig;
+    }
+
     public write(code: Map<string, DaoCode>) {
         code.forEach((v, k) => {
 
@@ -17,12 +24,12 @@ export class CodeWriter {
     }
 
     private writeModel(k: string, code: string) {
-        const modelPath = codeOutputLocation + paramCase(k) + '.ts'
+        const modelPath = this.writeConfig.codeOutputLocation + paramCase(k) + '.ts'
         writeFileSync(modelPath, code);
     }
 
     private writeDaoInterface(k: string, code: string) {
-        const path = codeOutputLocation + paramCase(k) + '-dao.ts'
+        const path = this.writeConfig.codeOutputLocation + paramCase(k) + '-dao.ts'
 
         const modelName = CodeUtil.getObjectName(k);
         const modelFileSuffix = paramCase(modelName);
@@ -34,7 +41,7 @@ ${code}
     }
 
     private writeDao(k: string, code: string, modelNames: readonly string[]) {
-        const path = codeOutputLocation + paramCase(k) + '-db-dao.ts'
+        const path = this.writeConfig.codeOutputLocation + paramCase(k) + '-db-dao.ts'
         const modelFileSuffix = paramCase(k).toLowerCase();
 
         const modelImports = modelNames.join(',');
