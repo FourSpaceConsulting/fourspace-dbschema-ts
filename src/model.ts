@@ -42,7 +42,8 @@ export interface SchemaDefinition {
 
 export interface CodeDefinition {
     table: string;
-    getKeys: ReadonlyArray<string>
+    getKeys: ReadonlyArray<ReadonlyArray<string>>;
+    queryKeys: ReadonlyArray<ReadonlyArray<string>>;
 }
 
 export interface SchemaReferences {
@@ -80,7 +81,7 @@ export interface VariableStringColumn extends StandardColumnDefinition {
 }
 export interface FixedStringColumn extends StandardColumnDefinition {
     type: ColumnType.fixedstring;
-    length: number;
+    size: number;
     isSurrogatePairEncoding?: boolean;
 }
 

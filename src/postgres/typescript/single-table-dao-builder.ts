@@ -19,8 +19,9 @@ export class GeneratingKeyTableCodeBuilder extends AbstractDaoBuilder {
         return `
 ${this.daoHeader(objectName)}
     saveItem(item: ${objectName}): Promise<${objectName}>;
-    ${CodeUtil.createGetMethodSignature('getItem', objectName, SchemaUtil.primaryKeyColumns(d))}
-    ${(codeDef?.getKeys ?? []).map(k => CodeUtil.createGetMethodSignature(`getItemBy${pascalCase(k)}`, objectName, SchemaUtil.columnsByName(d, [k]))).join(';\n')}
+    ${CodeUtil.createGetMethodSignature('getItem', true, objectName, SchemaUtil.primaryKeyColumns(d))}
+    ${(codeDef?.getKeys ?? []).map(k => CodeUtil.createGetMethodSignature(CodeUtil.getterName(k, true), true, objectName, SchemaUtil.columnsByName(d, k))).join(';\n')}
+    ${(codeDef?.queryKeys ?? []).map(k => CodeUtil.createGetMethodSignature(CodeUtil.getterName(k, false), false, objectName, SchemaUtil.columnsByName(d, k))).join(';\n')}
 }`;
     }
 
@@ -40,8 +41,9 @@ ${this.daoHeader(objectName)}
         const insertStatement = `INSERT INTO ${tableName} (${noPkColumns.join(',')}) VALUES (${noPkNumberColumns.join(',')}) returning ${pkReturnColumns.join(',')};`;
         const insertParams = noPkObjectColumns.join(',');
 
-        const getMethod = CodeUtil.createGetMethod('getItem', d.name, objectName, allColumns, SchemaUtil.primaryKeyColumns(d));
-        const getKeyMethods = (codeDef?.getKeys ?? []).map(k => CodeUtil.createGetMethod(`getItemBy${pascalCase(k)}`, d.name, objectName, allColumns, SchemaUtil.columnsByName(d, [k])));
+        const getMethod = CodeUtil.createGetMethod('getItem', true, d.name, objectName, allColumns, SchemaUtil.primaryKeyColumns(d));
+        const getKeyMethods = (codeDef?.getKeys ?? []).map(k => CodeUtil.createGetMethod(CodeUtil.getterName(k, true), true, d.name, objectName, allColumns, SchemaUtil.columnsByName(d, k)));
+        const queryKeyMethods = (codeDef?.queryKeys ?? []).map(k => CodeUtil.createGetMethod(CodeUtil.getterName(k, false), false, d.name, objectName, allColumns, SchemaUtil.columnsByName(d, k)));
 
         return `
 ${this.dbDaoHeader(objectName)}
@@ -56,10 +58,12 @@ ${this.dbDaoHeader(objectName)}
     
         ${getMethod.method}
         ${getKeyMethods.map(m => m.method).join(';\n')}
+        ${queryKeyMethods.map(m => m.method).join(';\n')}
     }
 
-    ${getMethod.constants}
-    ${getKeyMethods.map(m => m.constants).join(';\n')}
+    ${getMethod.constants};
+    ${getKeyMethods.map(m => m.constants).join(';\n')};
+    ${queryKeyMethods.map(m => m.constants).join(';\n')};
     const INSERT_STATEMENT = '${insertStatement}';
     
     `;

@@ -3,7 +3,7 @@ import { writeFileSync } from 'fs';
 import * as CodeUtil from './code-definition-util';
 import { paramCase } from 'change-case';
 
-const codeOutputLocation = 'C:/Users/Richard/Documents/Dev/spaces/thirdshift/generated/';
+const codeOutputLocation = 'C:/Users/fours/Development/spaces/thirdshift/generated/';
 
 export class CodeWriter {
     public write(code: Map<string, DaoCode>) {

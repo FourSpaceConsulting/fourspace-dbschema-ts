@@ -56,7 +56,7 @@ export class PostgresSchemaBuilder extends AbstractSchemaBuilder implements Sche
         const col = fk.column.toLowerCase();
         const refTable = fk.reference.table.toLowerCase();
         const refColumn = fk.reference.column.toLowerCase();
-        return `CONSTRAINT ${tableName}_${refTable}_${refColumn} FOREIGN KEY (${col})
+        return `CONSTRAINT ${tableName}_${refTable}_${refColumn}_${col} FOREIGN KEY (${col})
                 REFERENCES ${refTable} (${refColumn}) MATCH SIMPLE 
                 ON UPDATE NO ACTION ON DELETE NO ACTION`;
     }

@@ -40,7 +40,7 @@ export class CommonTypeMapper implements ColumnTypeMapper {
     }
 
     public convertFixedString(c: FixedStringColumn): string {
-        return c.length == null ? 'char' : 'char(' + c.length + ')';
+        return c.size == null ? 'char' : 'char(' + c.size + ')';
     }
 
     public convertVariableString(c: VariableStringColumn): string {

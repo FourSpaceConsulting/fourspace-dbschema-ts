@@ -15,8 +15,8 @@ export class OneOwnsManyTableCodeBuilder extends AbstractDaoBuilder implements T
         return `
 ${this.daoHeader(objectName)}
     saveItem(item: ${objectName}): Promise<${objectName}>;
-    ${(codeDef?.getKeys ?? []).map(k => CodeUtil.createGetMethodSignature(`getHeaderItemBy${pascalCase(k)}`, objectName, SchemaUtil.columnsByName(d, [k]))).join(';\n')}
-    ${(codeDef?.getKeys ?? []).map(k => CodeUtil.createGetMethodSignature(`getFullItemBy${pascalCase(k)}`, objectName, SchemaUtil.columnsByName(d, [k]))).join(';\n')}
+    ${(codeDef?.getKeys ?? []).map(k => CodeUtil.createGetMethodSignature(`getHeaderItemBy${k.map(i => pascalCase(i))}`, true, objectName, SchemaUtil.columnsByName(d, k))).join(';\n')}
+    ${(codeDef?.getKeys ?? []).map(k => CodeUtil.createGetMethodSignature(`getFullItemBy${k.map(i => pascalCase(i))}`, true, objectName, SchemaUtil.columnsByName(d, k))).join(';\n')}
 }`;
     }
     public createDaoImplementation(codeDef: CodeDefinition, d: TableDefinition, r: readonly TableDefinition[]): string {
@@ -27,8 +27,8 @@ ${this.daoHeader(objectName)}
         // get these from schema
         const childProperty = 'category';
         // --
-        const headerGetKeyMethods = (codeDef?.getKeys ?? []).map(k => CodeUtil.createGetMethod(`getHeaderItemBy${pascalCase(k)}`, d.name, objectName, allColumns, SchemaUtil.columnsByName(d, [k])));
-        const fullGetKeyMethods = (codeDef?.getKeys ?? []).map(k => createMultiGetter(`getFullItemBy${pascalCase(k)}`, d, ctd, SchemaUtil.columnsByName(d, [k])));
+        const headerGetKeyMethods = (codeDef?.getKeys ?? []).map(k => CodeUtil.createGetMethod(`getHeaderItemBy${k.map(i => pascalCase(i))}`, true, d.name, objectName, allColumns, SchemaUtil.columnsByName(d, k)));
+        const fullGetKeyMethods = (codeDef?.getKeys ?? []).map(k => createMultiGetter(`getFullItemBy${k.map(i => pascalCase(i))}`, d, ctd, SchemaUtil.columnsByName(d, k)));
         return `
 ${this.dbDaoHeader(objectName)}
 

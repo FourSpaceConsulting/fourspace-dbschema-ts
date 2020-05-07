@@ -70,13 +70,17 @@ export function createSelectStatement(table: string, selectColumns: readonly Col
 
 
 // DAO methods
-export function createGetMethodSignature(methodName: string, objectName: string, clauseColumns: readonly ColumnDefinition[]): string {
+export function getterName(k: readonly string[], isUniqueReturn: boolean) {
+    return (isUniqueReturn ? 'getItemBy' : 'getItemsBy') + k.map(i => pascalCase(i)).join('');
+}
+export function createGetMethodSignature(methodName: string, isUniqueReturn: boolean, objectName: string, clauseColumns: readonly ColumnDefinition[]): string {
     const clausePropertyDefinitions = getColumnObjectDefinitions(clauseColumns);
     const clausePropertyDefinitionsList = clausePropertyDefinitions.join(',');
-    return `${methodName}(${clausePropertyDefinitionsList}): Promise<${objectName}> `;
+    const retType = isUniqueReturn ? objectName : `ReadonlyArray<${objectName}>`;
+    return `${methodName}(${clausePropertyDefinitionsList}): Promise<${retType}> `;
 }
 
-export function createGetMethod(methodName: string, table: string, objectName: string, selectColumns: readonly ColumnDefinition[], clauseColumns: readonly ColumnDefinition[]): { method: string, constants: string } {
+export function createGetMethod(methodName: string, isUniqueReturn: boolean, table: string, objectName: string, selectColumns: readonly ColumnDefinition[], clauseColumns: readonly ColumnDefinition[]): { method: string, constants: string } {
     // select
     const statementName = `${snakeCase(methodName).toUpperCase()}_GET_STATEMENT`;
     const selectStatement = createSelectStatement(table, selectColumns, clauseColumns);
@@ -84,17 +88,20 @@ export function createGetMethod(methodName: string, table: string, objectName: s
     const clausePropertyDefinitions = getColumnObjectDefinitions(clauseColumns);
     const clauseProperties = getColumnObjectNames(clauseColumns);
     const clausePropertyDefinitionsList = clausePropertyDefinitions.join(',');
-    const clausePropertyList = clauseProperties.join(',');
+    const clausePropertyList = clauseProperties.length === 1 ? clauseProperties.join(',') : `[${clauseProperties.join(',')}]`;
     const clauseNullCheckList = clauseProperties.map(p => `${p} == null`).join(' || ');
     //
+    const retType = isUniqueReturn ? objectName : `ReadonlyArray<${objectName}>`;
+    const query = `await db.query(${statementName}, ${clausePropertyList})`;
+    const retQuery = isUniqueReturn ? `(${query})[0]` : query;
     return {
         method: `
-public async ${methodName}(${clausePropertyDefinitionsList}): Promise<${objectName}> {
+public async ${methodName}(${clausePropertyDefinitionsList}): Promise<${retType}> {
 if (${clauseNullCheckList}) {
     throw new Error('${objectName}::${methodName} invalid arguments');
 }
 const db = this.dbInterfaceProvider.getDbInterface();
-return (await db.query(${statementName}, ${clausePropertyList}))[0];
+return ${retQuery};
 }`
         ,
         constants: `const ${statementName} = '${selectStatement}'`
